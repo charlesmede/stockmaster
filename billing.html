@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturation - StockMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-slate-800">StockMaster</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Tableau de bord</a>
+                        <a href="products.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Produits</a>
+                        <a href="inventory.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Stock</a>
+                        <a href="billing.html" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm font-medium">Facturation</a>
+                        <a href="settings.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Paramètres</a>
+                        <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Déconnexion</button>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-slate-800">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="dashboard.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Tableau de bord</a>
+                <a href="products.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Produits</a>
+                <a href="inventory.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Stock</a>
+                <a href="billing.html" class="block px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Facturation</a>
+                <a href="settings.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Paramètres</a>
+                <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-600 hover:text-red-600">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-white">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">Facturation</h1>
+                <p class="text-blue-200">Gérez vos factures et reçus</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- New Invoice -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-800">Nouvelle facture</h3>
+                </div>
+                <p class="text-gray-600 mb-4">Créer une nouvelle facture professionnelle</p>
+                <button onclick="showCreateInvoiceModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors">
+                    Créer une facture
+                </button>
+            </div>
+
+            <!-- Invoice History -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-800">Historique</h3>
+                </div>
+                <p class="text-gray-600 mb-4">Consulter et gérer vos factures existantes</p>
+                <button onclick="scrollToInvoices()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors">
+                    Voir les factures
+                </button>
+            </div>
+        </div>
+
+        <!-- Invoices List -->
+        <div id="invoicesSection" class="bg-white rounded-xl p-6 border border-gray-200">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-slate-800">Mes factures</h3>
+                <div class="flex space-x-2">
+                    <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En attente</option>
+                        <option value="paid">Payée</option>
+                        <option value="cancelled">Annulée</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Facture</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div id="createInvoiceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-4xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Créer une facture</h2>
+                <button onclick="hideCreateInvoiceModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="invoiceForm" class="space-y-6">
+                <!-- Client Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom du client</label>
+                        <input type="text" name="clientName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email du client</label>
+                        <input type="email" name="clientEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                        <input type="tel" name="clientPhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date d'échéance</label>
+                        <input type="date" name="dueDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Adresse du client</label>
+                    <textarea name="clientAddress" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+
+                <!-- Invoice Items -->
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Articles</h3>
+                    <div id="invoiceItems" class="space-y-4">
+                        <!-- Dynamic items -->
+                    </div>
+                    <button type="button" onclick="addInvoiceItem()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Ajouter un article
+                    </button>
+                </div>
+
+                <!-- Invoice Summary -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Sous-total:</span>
+                        <span id="subtotal" class="text-sm font-medium text-gray-900">0.00€</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">TVA (20%):</span>
+                        <span id="tax" class="text-sm font-medium text-gray-900">0.00€</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-lg font-semibold text-slate-800">Total:</span>
+                        <span id="total" class="text-lg font-semibold text-slate-800">0.00€</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Créer la facture
+                    </button>
+                    <button type="button" onclick="hideCreateInvoiceModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-semibold transition-colors">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        let invoiceItems = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderInvoicesTable();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('statusFilter').addEventListener('change', filterInvoices);
+            document.getElementById('invoiceForm').addEventListener('submit', handleCreateInvoice);
+        }
+
+        function renderInvoicesTable() {
+            if (!stockManager) return;
+
+            const invoices = stockManager.invoices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const tableBody = document.getElementById('invoicesTableBody');
+            
+            if (invoices.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Aucune facture créée</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = invoices.map(invoice => {
+                const statusColor = {
+                    'pending': 'text-yellow-600 bg-yellow-100',
+                    'paid': 'text-green-600 bg-green-100',
+                    'cancelled': 'text-red-600 bg-red-100'
+                }[invoice.status] || 'text-gray-600 bg-gray-100';
+                
+                const statusText = {
+                    'pending': 'En attente',
+                    'paid': 'Payée',
+                    'cancelled': 'Annulée'
+                }[invoice.status] || 'Inconnu';
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${invoice.number}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${invoice.clientName}</div>
+                            <div class="text-sm text-gray-500">${invoice.clientEmail || ''}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${new Date(invoice.createdAt).toLocaleDateString()}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${invoice.total}€
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="downloadInvoicePDF(${invoice.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="markAsPaid(${invoice.id})" class="text-green-600 hover:text-green-900 mr-3">
+                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="deleteInvoice(${invoice.id})" class="text-red-600 hover:text-red-900">
+                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterInvoices() {
+            const filter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#invoicesTableBody tr');
+            
+            rows.forEach(row => {
+                if (!filter) {
+                    row.style.display = '';
+                } else {
+                    const statusCell = row.cells[4];
+                    const statusText = statusCell.textContent.trim().toLowerCase();
+                    const statusMap = {
+                        'en attente': 'pending',
+                        'payée': 'paid',
+                        'annulée': 'cancelled'
+                    };
+                    
+                    if (statusMap[statusText] === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function showCreateInvoiceModal() {
+            invoiceItems = [];
+            addInvoiceItem();
+            document.getElementById('createInvoiceModal').classList.remove('hidden');
+        }
+
+        function hideCreateInvoiceModal() {
+            document.getElementById('createInvoiceModal').classList.add('hidden');
+            document.getElementById('invoiceForm').reset();
+            invoiceItems = [];
+        }
+
+        function addInvoiceItem() {
+            if (!stockManager || stockManager.products.length === 0) {
+                alert('Aucun produit disponible. Veuillez d\'abord ajouter des produits.');
+                return;
+            }
+
+            const itemIndex = invoiceItems.length;
+            const itemHtml = `
+                <div class="grid grid-cols-12 gap-4 p-4 border border-gray-200 rounded-lg" data-item-index="${itemIndex}">
+                    <div class="col-span-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Produit</label>
+                        <select name="productId" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" onchange="updateItemPrice(${itemIndex})">
+                            <option value="">Sélectionner un produit</option>
+                            ${stockManager.products.map(product => `
+                                <option value="${product.id}" data-price="${product.sellingPrice}">${product.name}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
+                        <input type="number" name="quantity" min="1" value="1" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" onchange="calculateInvoiceTotal()">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prix unitaire</label>
+                        <input type="number" name="unitPrice" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" onchange="calculateInvoiceTotal()">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+                        <input type="text" name="itemTotal" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm">
+                    </div>
+                    <div class="col-span-1 flex items-end">
+                        <button type="button" onclick="removeInvoiceItem(${itemIndex})" class="text-red-600 hover:text-red-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('invoiceItems').insertAdjacentHTML('beforeend', itemHtml);
+            invoiceItems.push({});
+        }
+
+        function removeInvoiceItem(index) {
+            const itemElement = document.querySelector(`[data-item-index="${index}"]`);
+            if (itemElement) {
+                itemElement.remove();
+                invoiceItems.splice(index, 1);
+                calculateInvoiceTotal();
+            }
+        }
+
+        function updateItemPrice(index) {
+            const itemElement = document.querySelector(`[data-item-index="${index}"]`);
+            const select = itemElement.querySelector('select[name="productId"]');
+            const priceInput = itemElement.querySelector('input[name="unitPrice"]');
+            
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.dataset.price) {
+                priceInput.value = selectedOption.dataset.price;
+                calculateInvoiceTotal();
+            }
+        }
+
+        function calculateInvoiceTotal() {
+            let subtotal = 0;
+            const itemElements = document.querySelectorAll('#invoiceItems > div');
+            
+            itemElements.forEach((itemElement, index) => {
+                const quantity = parseFloat(itemElement.querySelector('input[name="quantity"]').value) || 0;
+                const unitPrice = parseFloat(itemElement.querySelector('input[name="unitPrice"]').value) || 0;
+                const itemTotal = quantity * unitPrice;
+                
+                itemElement.querySelector('input[name="itemTotal"]').value = itemTotal.toFixed(2) + '€';
+                subtotal += itemTotal;
+            });
+            
+            const tax = subtotal * 0.2; // 20% TVA
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2) + '€';
+            document.getElementById('tax').textContent = tax.toFixed(2) + '€';
+            document.getElementById('total').textContent = total.toFixed(2) + '€';
+        }
+
+        function handleCreateInvoice(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const items = [];
+            const itemElements = document.querySelectorAll('#invoiceItems > div');
+            
+            itemElements.forEach((itemElement, index) => {
+                const productId = itemElement.querySelector('select[name="productId"]').value;
+                const quantity = parseInt(itemElement.querySelector('input[name="quantity"]').value);
+                const unitPrice = parseFloat(itemElement.querySelector('input[name="unitPrice"]').value);
+                
+                if (productId && quantity && unitPrice) {
+                    const product = stockManager.products.find(p => p.id == productId);
+                    if (product) {
+                        items.push({
+                            productId: parseInt(productId),
+                            productName: product.name,
+                            quantity: quantity,
+                            price: unitPrice
+                        });
+                    }
+                }
+            });
+            
+            if (items.length === 0) {
+                alert('Veuillez ajouter au moins un article à la facture.');
+                return;
+            }
+            
+            const invoiceData = {
+                clientName: formData.get('clientName'),
+                clientEmail: formData.get('clientEmail'),
+                clientPhone: formData.get('clientPhone'),
+                clientAddress: formData.get('clientAddress'),
+                dueDate: formData.get('dueDate'),
+                items: items
+            };
+            
+            const invoice = stockManager.createInvoice(invoiceData);
+            
+            if (invoice) {
+                stockManager.showAlert('Facture créée avec succès', 'success');
+                hideCreateInvoiceModal();
+                renderInvoicesTable();
+                downloadInvoicePDF(invoice.id);
+            } else {
+                stockManager.showAlert('Erreur lors de la création de la facture', 'error');
+            }
+        }
+
+        function downloadInvoicePDF(invoiceId) {
+            const invoice = stockManager.invoices.find(i => i.id === invoiceId);
+            if (!invoice) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header
+            doc.setFontSize(20);
+            doc.text('FACTURE', 20, 30);
+            
+            doc.setFontSize(12);
+            doc.text(`N°: ${invoice.number}`, 20, 45);
+            doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 20, 55);
+            if (invoice.dueDate) {
+                doc.text(`Échéance: ${new Date(invoice.dueDate).toLocaleDateString()}`, 20, 65);
+            }
+
+            // Company info (if available)
+            if (stockManager.currentCompany) {
+                doc.text(stockManager.currentCompany.name, 120, 45);
+                doc.text(stockManager.currentCompany.address || '', 120, 55);
+                doc.text(stockManager.currentCompany.phone || '', 120, 65);
+            }
+
+            // Client info
+            doc.text('Facturé à:', 20, 85);
+            doc.text(invoice.clientName, 20, 95);
+            if (invoice.clientEmail) doc.text(invoice.clientEmail, 20, 105);
+            if (invoice.clientPhone) doc.text(invoice.clientPhone, 20, 115);
+            if (invoice.clientAddress) {
+                const addressLines = invoice.clientAddress.split('\n');
+                addressLines.forEach((line, index) => {
+                    doc.text(line, 20, 125 + (index * 10));
+                });
+            }
+
+            // Items table
+            let yPosition = 160;
+            doc.text('Description', 20, yPosition);
+            doc.text('Quantité', 100, yPosition);
+            doc.text('Prix unitaire', 130, yPosition);
+            doc.text('Total', 170, yPosition);
+            
+            yPosition += 10;
+            invoice.items.forEach(item => {
+                doc.text(item.productName, 20, yPosition);
+                doc.text(item.quantity.toString(), 100, yPosition);
+                doc.text(`${item.price.toFixed(2)}€`, 130, yPosition);
+                doc.text(`${(item.quantity * item.price).toFixed(2)}€`, 170, yPosition);
+                yPosition += 10;
+            });
+
+            // Total
+            yPosition += 20;
+            doc.text(`Sous-total: ${(invoice.total / 1.2).toFixed(2)}€`, 130, yPosition);
+            yPosition += 10;
+            doc.text(`TVA (20%): ${(invoice.total * 0.2).toFixed(2)}€`, 130, yPosition);
+            yPosition += 10;
+            doc.setFontSize(14);
+            doc.text(`TOTAL: ${invoice.total.toFixed(2)}€`, 130, yPosition);
+
+            doc.save(`facture-${invoice.number}.pdf`);
+        }
+
+        function markAsPaid(invoiceId) {
+            const invoice = stockManager.invoices.find(i => i.id === invoiceId);
+            if (invoice && invoice.status === 'pending') {
+                invoice.status = 'paid';
+                stockManager.saveData();
+                stockManager.showAlert('Facture marquée comme payée', 'success');
+                renderInvoicesTable();
+            }
+        }
+
+        function deleteInvoice(invoiceId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette facture ?')) {
+                stockManager.invoices = stockManager.invoices.filter(i => i.id !== invoiceId);
+                stockManager.saveData();
+                stockManager.showAlert('Facture supprimée avec succès', 'success');
+                renderInvoicesTable();
+            }
+        }
+
+        function scrollToInvoices() {
+            document.getElementById('invoicesSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function logout() {
+            localStorage.removeItem('stockManagerData');
+            window.location.href = 'index.html';
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Fermer les modals en cliquant en dehors
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('#createInvoiceModal')) {
+                hideCreateInvoiceModal();
+            }
+        });
+    </script>
+</body>
+</html>

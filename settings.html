@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - StockMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-slate-800">StockMaster</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Tableau de bord</a>
+                        <a href="products.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Produits</a>
+                        <a href="inventory.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Stock</a>
+                        <a href="billing.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Facturation</a>
+                        <a href="settings.html" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm font-medium">Paramètres</a>
+                        <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Déconnexion</button>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-slate-800">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="dashboard.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Tableau de bord</a>
+                <a href="products.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Produits</a>
+                <a href="inventory.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Stock</a>
+                <a href="billing.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Facturation</a>
+                <a href="settings.html" class="block px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Paramètres</a>
+                <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-600 hover:text-red-600">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-white">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">Paramètres</h1>
+                <p class="text-blue-200">Gérez les informations de votre entreprise</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Company Information -->
+        <div class="bg-white rounded-xl p-6 border border-gray-200 mb-8">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Informations de l'entreprise</h3>
+            
+            <form id="companyForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nom de l'entreprise</label>
+                        <input type="text" name="companyName" id="companyName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                        <input type="tel" name="companyPhone" id="companyPhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                    <textarea name="companyAddress" id="companyAddress" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Logo (URL)</label>
+                    <input type="url" name="companyLogo" id="companyLogo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-sm text-gray-500 mt-1">Entrez l'URL de votre logo ou uploadez-le sur un service d'hébergement d'images</p>
+                </div>
+                
+                <div id="logoPreview" class="hidden">
+                    <img id="logoImage" src="" alt="Logo preview" class="h-20 w-auto border border-gray-200 rounded-lg p-2">
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Enregistrer les modifications
+                    </button>
+                    <button type="button" onclick="resetCompanyForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Application Settings -->
+        <div class="bg-white rounded-xl p-6 border border-gray-200 mb-8">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Paramètres de l'application</h3>
+            
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Notifications de stock faible</h4>
+                        <p class="text-sm text-gray-500">Recevoir des alertes quand le stock est faible</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="lowStockNotifications" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Email de confirmation</h4>
+                        <p class="text-sm text-gray-500">Envoyer un email de confirmation pour les nouvelles factures</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="emailConfirmations" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Seuil de stock faible par défaut</label>
+                    <input type="number" id="defaultLowStockThreshold" min="1" value="10" class="w-full md:w-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-sm text-gray-500 mt-1">Nombre d'unités minimum avant d'être considéré comme stock faible</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="bg-white rounded-xl p-6 border border-gray-200 mb-8">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Gestion des données</h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Exporter les données</h4>
+                        <p class="text-sm text-gray-500">Télécharger une sauvegarde de toutes vos données</p>
+                    </div>
+                    <button onclick="exportData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Exporter
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Importer des données</h4>
+                        <p class="text-sm text-gray-500">Restaurer vos données à partir d'un fichier de sauvegarde</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                        <button onclick="document.getElementById('importFile').click()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            Importer
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-red-900">Supprimer toutes les données</h4>
+                        <p class="text-sm text-red-600">Cette action est irréversible et supprimera toutes vos données</p>
+                    </div>
+                    <button onclick="clearAllData()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Paramètres du compte</h3>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Changer le mot de passe</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="password" id="newPassword" placeholder="Nouveau mot de passe" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="password" id="confirmPassword" placeholder="Confirmer le mot de passe" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="changePassword()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Changer le mot de passe
+                    </button>
+                    <button onclick="deleteAccount()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Supprimer le compte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCompanySettings();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('companyLogo').addEventListener('input', updateLogoPreview);
+            document.getElementById('companyForm').addEventListener('submit', handleCompanySettings);
+        }
+
+        function loadCompanySettings() {
+            if (!stockManager || !stockManager.currentCompany) return;
+
+            const company = stockManager.currentCompany;
+            
+            document.getElementById('companyName').value = company.name || '';
+            document.getElementById('companyPhone').value = company.phone || '';
+            document.getElementById('companyAddress').value = company.address || '';
+            document.getElementById('companyLogo').value = company.logo || '';
+            
+            if (company.logo) {
+                updateLogoPreview();
+            }
+        }
+
+        function updateLogoPreview() {
+            const logoUrl = document.getElementById('companyLogo').value;
+            const preview = document.getElementById('logoPreview');
+            const image = document.getElementById('logoImage');
+            
+            if (logoUrl) {
+                image.src = logoUrl;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        function handleCompanySettings(e) {
+            e.preventDefault();
+            
+            if (!stockManager || !stockManager.currentCompany) return;
+            
+            const formData = new FormData(e.target);
+            const updates = {
+                name: formData.get('companyName'),
+                phone: formData.get('companyPhone'),
+                address: formData.get('companyAddress'),
+                logo: formData.get('companyLogo')
+            };
+            
+            stockManager.currentCompany = { ...stockManager.currentCompany, ...updates };
+            stockManager.currentUser.company = stockManager.currentCompany;
+            stockManager.saveData();
+            
+            stockManager.showAlert('Informations de l\'entreprise mises à jour avec succès', 'success');
+        }
+
+        function resetCompanyForm() {
+            loadCompanySettings();
+        }
+
+        function exportData() {
+            if (!stockManager) return;
+            
+            const data = {
+                products: stockManager.products,
+                transactions: stockManager.transactions,
+                invoices: stockManager.invoices,
+                company: stockManager.currentCompany,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `stockmaster-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            stockManager.showAlert('Données exportées avec succès', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('Cette action remplacera toutes vos données actuelles. Êtes-vous sûr de vouloir continuer ?')) {
+                        if (data.products) stockManager.products = data.products;
+                        if (data.transactions) stockManager.transactions = data.transactions;
+                        if (data.invoices) stockManager.invoices = data.invoices;
+                        if (data.company) stockManager.currentCompany = data.company;
+                        
+                        stockManager.saveData();
+                        stockManager.showAlert('Données importées avec succès', 'success');
+                        
+                        // Reload page to refresh all data
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    stockManager.showAlert('Erreur lors de l\'importation des données', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer toutes vos données ? Cette action est irréversible.')) {
+                if (confirm('Cette action supprimera définitivement tous vos produits, transactions et factures. Êtes-vous vraiment sûr ?')) {
+                    localStorage.removeItem('stockManagerData');
+                    stockManager.showAlert('Toutes les données ont été supprimées', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!newPassword || !confirmPassword) {
+                stockManager.showAlert('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                stockManager.showAlert('Les mots de passe ne correspondent pas', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                stockManager.showAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
+                return;
+            }
+            
+            // Update password in users list
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.email === stockManager.currentUser.email);
+            
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                stockManager.currentUser.password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+                stockManager.saveData();
+                
+                stockManager.showAlert('Mot de passe modifié avec succès', 'success');
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            }
+        }
+
+        function deleteAccount() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+                if (confirm('Cette action supprimera définitivement votre compte et toutes vos données. Êtes-vous vraiment sûr ?')) {
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const filteredUsers = users.filter(u => u.email !== stockManager.currentUser.email);
+                    localStorage.setItem('users', JSON.stringify(filteredUsers));
+                    
+                    localStorage.removeItem('stockManagerData');
+                    stockManager.showAlert('Compte supprimé avec succès', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('stockManagerData');
+            window.location.href = 'index.html';
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

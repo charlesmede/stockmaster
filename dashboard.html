@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - StockMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-slate-800">StockMaster</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm font-medium">Tableau de bord</a>
+                        <a href="products.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Produits</a>
+                        <a href="inventory.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Stock</a>
+                        <a href="billing.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Facturation</a>
+                        <a href="settings.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Paramètres</a>
+                        <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Déconnexion</button>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-slate-800">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="dashboard.html" class="block px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Tableau de bord</a>
+                <a href="products.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Produits</a>
+                <a href="inventory.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Stock</a>
+                <a href="billing.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Facturation</a>
+                <a href="settings.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Paramètres</a>
+                <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-600 hover:text-red-600">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-white">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">Tableau de bord</h1>
+                <p class="text-blue-200">Bienvenue dans votre espace de gestion</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Products -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Produits</p>
+                        <p class="text-2xl font-bold text-slate-800" id="totalProducts">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Stock Faible</p>
+                        <p class="text-2xl font-bold text-red-600" id="lowStockCount">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Chiffre d'affaires (30j)</p>
+                        <p class="text-2xl font-bold text-green-600" id="monthlyRevenue">0€</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Transactions (30j)</p>
+                        <p class="text-2xl font-bold text-slate-800" id="monthlyTransactions">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Revenue Chart -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Chiffre d'affaires</h3>
+                <div id="revenueChart" style="height: 300px;"></div>
+            </div>
+
+            <!-- Stock Distribution -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Répartition des stocks</h3>
+                <div id="stockChart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <!-- Top Products and Recent Transactions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Top Products -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Top Produits</h3>
+                <div id="topProductsList" class="space-y-3">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Transactions Récentes</h3>
+                <div id="recentTransactionsList" class="space-y-3">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Actions Rapides</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="window.location.href='products.html'" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Ajouter Produit</span>
+                </button>
+                
+                <button onclick="window.location.href='inventory.html'" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Entrée Stock</span>
+                </button>
+                
+                <button onclick="window.location.href='billing.html'" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-purple-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Nouvelle Facture</span>
+                </button>
+                
+                <button onclick="exportReport()" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-8 h-8 text-red-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Exporter Rapport</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        let revenueChart, stockChart;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            updateDashboard();
+        });
+
+        function initializeCharts() {
+            // Revenue Chart
+            revenueChart = echarts.init(document.getElementById('revenueChart'));
+            const revenueOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: '{b}: {c}€'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: getLast30Days()
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: '{value}€'
+                    }
+                },
+                series: [{
+                    data: generateRevenueData(),
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: {
+                        color: '#3b82f6'
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{
+                                offset: 0, color: 'rgba(59, 130, 246, 0.3)'
+                            }, {
+                                offset: 1, color: 'rgba(59, 130, 246, 0.05)'
+                            }]
+                        }
+                    }
+                }]
+            };
+            revenueChart.setOption(revenueOption);
+
+            // Stock Chart
+            stockChart = echarts.init(document.getElementById('stockChart'));
+            const stockOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                series: [{
+                    name: 'Stock',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: generateStockData()
+                }]
+            };
+            stockChart.setOption(stockOption);
+        }
+
+        function updateDashboard() {
+            if (!stockManager) return;
+
+            // Update stats
+            document.getElementById('totalProducts').textContent = stockManager.products.length;
+            document.getElementById('lowStockCount').textContent = stockManager.getLowStockProducts().length;
+            document.getElementById('monthlyRevenue').textContent = stockManager.getRevenueData() + '€';
+            
+            const recentTransactions = stockManager.transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return transactionDate >= thirtyDaysAgo;
+            });
+            document.getElementById('monthlyTransactions').textContent = recentTransactions.length;
+
+            // Update top products
+            updateTopProducts();
+            
+            // Update recent transactions
+            updateRecentTransactions();
+        }
+
+        function updateTopProducts() {
+            const topProducts = stockManager.getTopProducts();
+            const container = document.getElementById('topProductsList');
+            
+            if (topProducts.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">Aucune vente enregistrée</p>';
+                return;
+            }
+
+            container.innerHTML = topProducts.map((item, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 mr-3">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-800">${item.product.name}</p>
+                            <p class="text-sm text-gray-600">${item.totalQuantity} vendus</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-green-600">${item.totalRevenue}€</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecentTransactions() {
+            const recentTransactions = stockManager.transactions
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            
+            const container = document.getElementById('recentTransactionsList');
+            
+            if (recentTransactions.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">Aucune transaction</p>';
+                return;
+            }
+
+            container.innerHTML = recentTransactions.map(transaction => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-slate-800">${transaction.productName}</p>
+                        <p class="text-sm text-gray-600">${transaction.type === 'entry' ? 'Entrée' : 'Sortie'} • ${new Date(transaction.date).toLocaleDateString()}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold ${transaction.type === 'entry' ? 'text-blue-600' : 'text-green-600'}">
+                            ${transaction.type === 'entry' ? '+' : '-'}${transaction.total}€
+                        </p>
+                        <p class="text-sm text-gray-600">${transaction.quantity} unités</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getLast30Days() {
+            const days = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }));
+            }
+            return days;
+        }
+
+        function generateRevenueData() {
+            const data = [];
+            for (let i = 0; i < 30; i++) {
+                data.push(Math.floor(Math.random() * 1000) + 200);
+            }
+            return data;
+        }
+
+        function generateStockData() {
+            const categories = ['Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Autres'];
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            return categories.map((cat, index) => ({
+                value: Math.floor(Math.random() * 100) + 20,
+                name: cat,
+                itemStyle: { color: colors[index] }
+            }));
+        }
+
+        function exportReport() {
+            alert('Fonctionnalité d\'export en cours de développement');
+        }
+
+        function logout() {
+            localStorage.removeItem('stockManagerData');
+            window.location.href = 'index.html';
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Responsive charts
+        window.addEventListener('resize', function() {
+            if (revenueChart) revenueChart.resize();
+            if (stockChart) stockChart.resize();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Produits - StockMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-slate-800">StockMaster</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Tableau de bord</a>
+                        <a href="products.html" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm font-medium">Produits</a>
+                        <a href="inventory.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Stock</a>
+                        <a href="billing.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Facturation</a>
+                        <a href="settings.html" class="text-gray-600 hover:text-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">Paramètres</a>
+                        <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Déconnexion</button>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-slate-800">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="dashboard.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Tableau de bord</a>
+                <a href="products.html" class="block px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Produits</a>
+                <a href="inventory.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Stock</a>
+                <a href="billing.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Facturation</a>
+                <a href="settings.html" class="block px-3 py-2 text-gray-600 hover:text-slate-800">Paramètres</a>
+                <button onclick="logout()" class="block w-full text-left px-3 py-2 text-gray-600 hover:text-red-600">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-white">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">Gestion des Produits</h1>
+                <p class="text-blue-200">Gérez votre catalogue de produits</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Actions Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Rechercher un produit..." 
+                           class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Toutes les catégories</option>
+                    <option value="Électronique">Électronique</option>
+                    <option value="Vêtements">Vêtements</option>
+                    <option value="Alimentation">Alimentation</option>
+                    <option value="Maison">Maison</option>
+                    <option value="Autres">Autres</option>
+                </select>
+            </div>
+            <button onclick="showAddProductModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Ajouter un produit
+            </button>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Achat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Vente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun produit</h3>
+            <p class="mt-1 text-sm text-gray-500">Commencez par ajouter votre premier produit.</p>
+            <div class="mt-6">
+                <button onclick="showAddProductModal()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Ajouter un produit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Ajouter un produit</h2>
+                <button onclick="hideAddProductModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="productForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nom du produit</label>
+                    <input type="text" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                    <select name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Sélectionner une catégorie</option>
+                        <option value="Électronique">Électronique</option>
+                        <option value="Vêtements">Vêtements</option>
+                        <option value="Alimentation">Alimentation</option>
+                        <option value="Maison">Maison</option>
+                        <option value="Autres">Autres</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prix d'achat</label>
+                        <input type="number" name="purchasePrice" step="0.01" min="0" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prix de vente</label>
+                        <input type="number" name="sellingPrice" step="0.01" min="0" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Stock minimum</label>
+                    <input type="number" name="minStock" min="1" value="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description (optionnel)</label>
+                    <textarea name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                    Ajouter le produit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Modifier le produit</h2>
+                <button onclick="hideEditProductModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="editProductForm" class="space-y-4">
+                <input type="hidden" name="productId" id="editProductId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nom du produit</label>
+                    <input type="text" name="name" id="editProductName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                    <select name="category" id="editProductCategory" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="Électronique">Électronique</option>
+                        <option value="Vêtements">Vêtements</option>
+                        <option value="Alimentation">Alimentation</option>
+                        <option value="Maison">Maison</option>
+                        <option value="Autres">Autres</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prix d'achat</label>
+                        <input type="number" name="purchasePrice" id="editPurchasePrice" step="0.01" min="0" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prix de vente</label>
+                        <input type="number" name="sellingPrice" id="editSellingPrice" step="0.01" min="0" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Stock minimum</label>
+                    <input type="number" name="minStock" id="editMinStock" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" id="editDescription" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Enregistrer
+                    </button>
+                    <button type="button" onclick="hideEditProductModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-semibold transition-colors">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        let currentEditingProduct = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProductsList();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterProducts);
+            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+            
+            // Form submissions
+            document.getElementById('productForm').addEventListener('submit', handleAddProduct);
+            document.getElementById('editProductForm').addEventListener('submit', handleEditProduct);
+        }
+
+        function renderProductsList() {
+            if (!stockManager) return;
+
+            const products = stockManager.products;
+            const tableBody = document.getElementById('productsTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (products.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            tableBody.innerHTML = products.map(product => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${product.name}</div>
+                                <div class="text-sm text-gray-500">${product.description || 'Aucune description'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${product.code}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            ${product.category}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900 ${product.stock <= product.minStock ? 'text-red-600 font-semibold' : ''}">
+                            ${product.stock} unités
+                        </div>
+                        ${product.stock <= product.minStock ? '<div class="text-xs text-red-500">Stock faible</div>' : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${product.purchasePrice}€</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${product.sellingPrice}€</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </button>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-900">
+                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            const rows = document.querySelectorAll('#productsTableBody tr');
+            
+            rows.forEach(row => {
+                const productName = row.querySelector('.text-gray-900').textContent.toLowerCase();
+                const productCategory = row.querySelector('.bg-blue-100').textContent.trim();
+                
+                const matchesSearch = productName.includes(searchTerm);
+                const matchesCategory = !categoryFilter || productCategory === categoryFilter;
+                
+                if (matchesSearch && matchesCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function showAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('hidden');
+        }
+
+        function hideAddProductModal() {
+            document.getElementById('addProductModal').classList.add('hidden');
+            document.getElementById('productForm').reset();
+        }
+
+        function showEditProductModal() {
+            document.getElementById('editProductModal').classList.remove('hidden');
+        }
+
+        function hideEditProductModal() {
+            document.getElementById('editProductModal').classList.add('hidden');
+            currentEditingProduct = null;
+        }
+
+        function handleAddProduct(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const productData = {
+                name: formData.get('name'),
+                category: formData.get('category'),
+                purchasePrice: parseFloat(formData.get('purchasePrice')),
+                sellingPrice: parseFloat(formData.get('sellingPrice')),
+                minStock: parseInt(formData.get('minStock')) || 10,
+                description: formData.get('description')
+            };
+            
+            stockManager.addProduct(productData);
+            stockManager.showAlert('Produit ajouté avec succès', 'success');
+            
+            hideAddProductModal();
+            renderProductsList();
+        }
+
+        function handleEditProduct(e) {
+            e.preventDefault();
+            
+            if (!currentEditingProduct) return;
+            
+            const formData = new FormData(e.target);
+            const updates = {
+                name: formData.get('name'),
+                category: formData.get('category'),
+                purchasePrice: parseFloat(formData.get('purchasePrice')),
+                sellingPrice: parseFloat(formData.get('sellingPrice')),
+                minStock: parseInt(formData.get('minStock')),
+                description: formData.get('description')
+            };
+            
+            stockManager.updateProduct(currentEditingProduct, updates);
+            stockManager.showAlert('Produit modifié avec succès', 'success');
+            
+            hideEditProductModal();
+            renderProductsList();
+        }
+
+        function editProduct(productId) {
+            const product = stockManager.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            currentEditingProduct = productId;
+            
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editProductName').value = product.name;
+            document.getElementById('editProductCategory').value = product.category;
+            document.getElementById('editPurchasePrice').value = product.purchasePrice;
+            document.getElementById('editSellingPrice').value = product.sellingPrice;
+            document.getElementById('editMinStock').value = product.minStock;
+            document.getElementById('editDescription').value = product.description || '';
+            
+            showEditProductModal();
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+                stockManager.deleteProduct(productId);
+                stockManager.showAlert('Produit supprimé avec succès', 'success');
+                renderProductsList();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('stockManagerData');
+            window.location.href = 'index.html';
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Fermer les modals en cliquant en dehors
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('#addProductModal')) {
+                hideAddProductModal();
+            }
+            if (e.target.matches('#editProductModal')) {
+                hideEditProductModal();
+            }
+        });
+    </script>
+</body>
+</html>
